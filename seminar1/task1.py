@@ -9,10 +9,7 @@
 
 def digits_sum():
     num = is_digit().replace('.', '')
-    digits_sum = 0
-    for i in num:
-        digits_sum += int(i)
-    return digits_sum
+    return sum(int(i) for i in num)
 
 
 def is_digit():
