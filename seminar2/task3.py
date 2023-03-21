@@ -8,6 +8,8 @@
 10 -> 1 2 4 8
 """
 
+from itertools import permutations
+
 
 def num_isdigit() -> int:
     while True:
@@ -24,5 +26,11 @@ def num_exponent() -> list:
     return [2 ** i for i in range(num) if 2 ** i <= num]
 
 
+def max_num(nums_list: list) -> int:
+    return int(max(''.join(i) for i in permutations(str(i) for i in nums_list)))
+
+
 if __name__ == '__main__':
-    print(num_exponent())
+    # print(num_exponent())
+    nums_list = [61, 228, 9]
+    print(max_num(nums_list))
