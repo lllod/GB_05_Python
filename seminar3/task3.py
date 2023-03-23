@@ -10,3 +10,22 @@ F, H, V, W, Y – 4 очка; K – 5 очков; J, X – 8 очков; Q, Z �
 ноутбук
     12
 """
+
+
+def words_cost() -> int:
+    words_cost_dict = {1: 'A, E, I, O, U, L, N, S, T, R, А, В, Е, И, Н, О, Р, С, Т',
+                       2: 'D, G, Д, К, Л, М, П, У',
+                       3: 'B, C, M, P, Б, Г, Ё, Ь, Я',
+                       4: 'F, H, V, W, Y, Й, Ы',
+                       5: 'K, Ж, З, Х, Ц, Ч',
+                       8: 'J, X, Ш, Э, Ю',
+                       10: 'Q, Z, Ф, Щ, Ъ'}
+    total_cost = 0
+    user_word = input('Введите слово: ').upper()
+    for word in user_word:
+        total_cost += sum(cost for cost, _ in words_cost_dict.items() if word in _)
+    return total_cost
+
+
+if __name__ == '__main__':
+    print(words_cost())
