@@ -6,10 +6,13 @@
 challenge=17&course=python&lesson=2
 """
 
-# in_dict = {'course': 'python', 'lesson': 2, 'challenge': 17}
-# sort_in_dict = sorted(in_dict.items(), key=lambda x: x[0])
-# print(sort_in_dict)
-# print(sort_in_dict[0][1])
-# for i in sort_in_dict:
-#     text = '&'.join('='.join(str(_)) for _ in i)
-# print(text)
+
+def dict_to_query(in_dict: dict) -> str:
+    sort_in = sorted(in_dict.items())
+    query = '&'.join([f'{key}={value}' for key, value in sort_in])
+    return query
+
+
+if __name__ == '__main__':
+    in_dict = {'course': 'python', 'lesson': 2, 'challenge': 17}
+    print(dict_to_query(in_dict))
