@@ -7,6 +7,8 @@ A = 3; B = 5 -> 243 (3⁵)
 
 
 def exponentiation(number: int, num_to_exp: int) -> int:
+    if num_to_exp == 0:
+        return 1
     return number * (exponentiation(number, num_to_exp - 1) if num_to_exp > 2 else number)
 
 
