@@ -7,11 +7,11 @@
 """
 
 
-# def rec_sum(first_num: int, second_sum: int) -> int:
-#     return first_num + (1 if rec_sum(first_num, second_sum - 1) else 0)
-#
-#
-# if __name__ == '__main__':
-#     first_num = int(input('Введите первое число: '))
-#     second_sum = int(input('Введите второе число: '))
-#     print(rec_sum(first_num, second_sum))
+def rec_sum(a: int, b: int) -> int:
+    return 1 + rec_sum(a, b - 1) if b else a
+
+
+if __name__ == '__main__':
+    first_num = int(input('Введите первое число: '))
+    second_sum = int(input('Введите второе число: '))
+    print(rec_sum(first_num, second_sum))
