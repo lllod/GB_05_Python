@@ -7,19 +7,13 @@
 """
 
 
-def arithmetic_progression() -> list:
-    print('Введите первый элемент:', end=' ')
-    start_el = is_digit()
-    print('Введите разность:', end=' ')
-    step = is_digit()
-    print('Введите количество элементов:', end=' ')
-    el_count = is_digit()
-    return [i for i in range(start_el, start_el + el_count * step, step)]
+def arithmetic_progression(start: int, step: int, count: int) -> list:
+    return [i for i in range(start, start + count * step, step)]
 
 
-def is_digit() -> int:
+def is_digit(text: str) -> int:
     while True:
-        num = input()
+        num = input(text)
         try:
             int(num)
             return int(num)
@@ -28,5 +22,8 @@ def is_digit() -> int:
 
 
 if __name__ == '__main__':
-    arithmetic_progression_list = arithmetic_progression()
+    start_el = is_digit('Введите первый элемент: ')
+    step_el = is_digit('Введите разность: ')
+    el_count = is_digit('Введите количество элементов: ')
+    arithmetic_progression_list = arithmetic_progression(start_el, step_el, el_count)
     print(*arithmetic_progression_list)
