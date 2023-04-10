@@ -16,86 +16,84 @@
 import json
 import os
 import pathlib
-
-
-# with open('json_test.json', 'w', encoding='UTF-8') as fp:
-#     json.dump(a, fp, indent=2, ensure_ascii=False)
-#
-# with open('json_test.json', 'r', encoding='UTF-8') as fp1:
-#     file = json.load(fp1)
-
-# print(file[-1])
-
-# name = input('Введите имя: ')
-# surname = input('Введите фамилию: ')
-# patronymic = input('Введите отчество: ')
-# phone_number = input('Введите номер телефона: ')
-#
-# a.append({'id': len(file) + 1,
-#           'contact': {'name': name, 'surname': surname, 'patronymic': patronymic, 'phone_number': phone_number}})
-#
-# print(file[-1])
-# print(a)
-
-# search = input('Введите запрос: ')
-# search_list = ['name', 'surname', 'patronymic', 'phone_number']
-# print(list(filter(lambda el: search in el['name'] or search in el['surname'] or search in
-#                              el['patronymic'] or search in el['phone_number'], a)))
-
-# file = open('json_test.json', 'w+', encoding='UTF-8')
-# json.dump(a, file, indent=2, ensure_ascii=False)
-# print(len(file.read()))
-#
+import uuid
 
 
 def add_contact(file_name='seminar8'):
     if not pathlib.Path(f'{file_name}.txt').exists():
-        create_file(file_name)
+        file = create_file(file_name)
+    else:
+        file = open_file(file_name)
+    new_contact_info(file)
+    save_file(file, file_name)
+
+
+def new_contact_info(file: list):
+    contact_id = str(uuid.uuid4())[:8]
     name = input('Введите имя: ')
     surname = input('Введите фамилию: ')
     patronymic = input('Введите отчество: ')
     phone_number = input('Введите номер телефона: ')
-    with open(f'{file_name}.txt', 'a+', encoding='UTF-8') as contacts_list:
-        file = json.load(contacts_list)
-    new_contact_dict = str({'id': len(file) + 1, 'name': name, 'surname': surname, 'patronymic': patronymic,
-                            'phone_number': phone_number})
-    contacts_list.write(new_contact_dict)
+    new_contact_dict = {'id': contact_id, 'name': name, 'surname': surname, 'patronymic': patronymic,
+                        'phone_number': phone_number}
+    file.append(new_contact_dict)
+    return file
 
 
 def create_file(file_name: str):
-    with open(os.path.join(os.path.dirname(__file__), f'{file_name}.txt'), 'w', encoding='UTF-8'):
+    with open(os.path.join(os.path.dirname(__file__), f'{file_name}.txt'), 'w', encoding='UTF-8') as new_file:
         pass
-    return os.path.join(os.path.dirname(__file__), f'{file_name}.txt')
+    return list()
+
+
+def open_file(file_name: str):
+    with open(f'{file_name}.txt', 'r', encoding='UTF-8') as contacts_list:
+        file = json.load(contacts_list)
+    return file
+
+
+def save_file(file: list, file_name: str):
+    with open(f'{file_name}.txt', 'w', encoding='UTF-8') as contacts_list:
+        json.dump(file, contacts_list, indent=2, ensure_ascii=False)
+    print('<!-- Контакт успешно добавлен --!>')
 
 
 def searching_contact(file_name='seminar8'):
-    file = open(os.path.join(os.path.dirname(__file__), f'{file_name}.txt'), 'r', encoding='URF-8')
-    search = input('Введите запрос: ')
-    print_contact(list(filter(lambda el: search in el['name'] or search in el['surname'] or search in
-                                  el['patronymic'] or search in el['phone_number'], file)))
+    with open(os.path.join(os.path.dirname(__file__), f'{file_name}.txt'), 'r', encoding='UTF-8') as contact_list:
+        file = json.load(contact_list)
+        search = input('Введите запрос: ').upper()
+        print_contact(list(filter(
+            lambda el: search in el['name'].upper() or search in el['surname'].upper() or search in el[
+                'patronymic'].upper() or search in el['phone_number'].upper(), file)))
 
 
-def print_contact(cotacts_list: list):
-    for i in cotacts_list:
-        print('\n'.join(f'{k}: {v}' for k, v in i.items() if k != 'id'), end='\n\n')
+def print_contact(contacts_list: list):
+    human_key = {'name': 'Имя', 'surname': 'Фамилия', 'patronymic': 'Отчество', 'phone_number': 'Номер телефона'}
+    for i in contacts_list:
+        print('\n'.join(f'{human_key[k]}: {v}' for k, v in i.items() if k != 'id'), end='\n\n')
+
+
+def user_choice():
+    data = {1: 'Добавить контакт',
+            2: 'Поиск по справочнику',
+            3: 'Обновить контакт',
+            4: 'Удалить контакт',
+            5: 'Закончить работу со справочником'}
+    print('-' * 10)
+    print('\n'.join(f'{k}: {v}' for k, v in data.items()))
+    print('-' * 10)
+    print('Что делаем?')
+    choice = int(input())
+    if choice == 1:
+        add_contact()
+    elif choice == 2:
+        searching_contact()
+    else:
+        print('<!-- Работа со справочником завершается --!>')
+        return 0
+    user_choice()
+
 
 
 if __name__ == '__main__':
-    # a = [
-    #     {
-    #         'id': 1,
-    #         'name': 'Вася',
-    #         'surname': 'Пупкин',
-    #         'patronymic': 'Всеволодович',
-    #         'phone_number': '+78512666666'
-    #     },
-    #     {
-    #         'id': 2,
-    #         'name': 'Слава',
-    #         'surname': 'Пупкин',
-    #         'patronymic': 'Всеволодович',
-    #         'phone_number': '+123'
-    #     }
-    # ]
-    add_contact()
-    searching_contact()
+    user_choice()
