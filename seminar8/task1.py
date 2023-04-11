@@ -7,7 +7,7 @@
     3) Пользователь может ввести одну из характеристик для поиска определенной записи (например, имя или фамилию).
     4) Использование функций. Ваша программа не должна быть линейной.
 
-2. Дополнить телефонный справочник возможностью изменения и удаления данных. Пользователь также может ввести имя или
++ 2. Дополнить телефонный справочник возможностью изменения и удаления данных. Пользователь также может ввести имя или
 фамилию, и Вы должны реализовать функционал для изменения и удаления данных
 
 3. Настроить взаимодействие со справочником через чат телеграмма.
@@ -16,9 +16,10 @@
 import json
 import os
 import pathlib
+import re
 
 
-def add_contact(file_name) -> None:
+def add_contact(file_name: str) -> None:
     try:
         file = open_file(file_name)
         contact_id = file[-1]['id'] + 1
@@ -34,14 +35,14 @@ def new_contact_info(file: list, contact_id: int) -> list:
     name = input('Введите имя: ').capitalize()
     surname = input('Введите фамилию: ').capitalize()
     patronymic = input('Введите отчество: ').capitalize()
-    phone_number = input('Введите номер телефона: ')
+    phone_number = phone_number_is_correct()
     new_contact_dict = {'id': contact_id, 'name': name, 'surname': surname, 'patronymic': patronymic,
                         'phone_number': phone_number}
     file.append(new_contact_dict)
     return file
 
 
-def delete_contact(file_name):
+def delete_contact(file_name: str) -> None:
     print('\n<!-- Найдите контакт, который необходимо удалить --!>\n')
     if searching_contact(file_name):
         contact_id_delete = input('Введите номер контакта, который необходимо удалить: ')
@@ -57,18 +58,68 @@ def delete_contact(file_name):
         delete_contact(file_name)
 
 
-def update_contact(file_name):
+def update_contact(file_name: str) -> None:
     print('\n<!-- Найдите контакт, который необходимо изменить --!>\n')
     if searching_contact(file_name):
         contact_id_update = input('Введите номер контакта, который необходимо изменить: ')
         file = open_file(file_name)
         try:
             contact_update = next(x for x in file if contact_id_update in str(x['id']))
-            print(contact_update)
+            contact_update_index = file.index(contact_update)
+            update_menu(file, contact_update_index, file_name)
         except StopIteration:
             print('\n<!-- Вы ввели некорректные данные --!>\n')
     else:
         update_contact(file_name)
+
+
+def update_fileds(file_list: list, contact_index: int, file_name: str) -> int:
+    print('\n<!-- Выберите действие --!>\n')
+    update_choice = int(input())
+    file_for_update = file_list
+    if update_choice == 1:
+        name = input('Введите имя: ').capitalize()
+        file_for_update[contact_index]['name'] = name
+    elif update_choice == 2:
+        surname = input('Введите фамилию: ').capitalize()
+        file_for_update[contact_index]['surname'] = surname
+    elif update_choice == 3:
+        patronymic = input('Введите отчество: ').capitalize()
+        file_for_update[contact_index]['patronymic'] = patronymic
+    elif update_choice == 4:
+        phone_number = phone_number_is_correct()
+        file_for_update[contact_index]['phone_number'] = phone_number
+    elif update_choice == 5:
+        save_file(file_for_update, file_name)
+        print('\n<!-- Изменения сохранены --!>\n')
+    else:
+        return 0
+    return 1
+
+
+def update_menu(file_list: list, contact_index: int, file_name: str) -> int:
+    data_update = {1: 'Изменить имя',
+                   2: 'Изменить фамилию',
+                   3: 'Изменить отчество',
+                   4: 'Изменить номер',
+                   5: 'Сохранить изменения',
+                   6: 'Закрыть меню'}
+    print('-' * 10)
+    print('\n'.join(f'{k}: {v}' for k, v in data_update.items()))
+    print('-' * 10)
+    if not update_fileds(file_list, contact_index, file_name):
+        return 0
+    update_menu(file_list, contact_index, file_name)
+
+
+def phone_number_is_correct() -> str:
+    phone_number = input('Введите номер телефона (с 8 или +7): ')
+    if len(phone_number) < 13 and \
+            [m.group() for m in re.finditer(r"((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}", phone_number)]:
+        return phone_number
+    else:
+        print('Некорректный номер телефона! Попробуйте еще раз')
+        phone_number_is_correct()
 
 
 def create_file(file_name: str) -> list:
@@ -95,8 +146,7 @@ def searching_contact(file_name) -> int:
         except json.decoder.JSONDecodeError:
             print('\n<!-- Справочник пуст --!>\n')
             return 0
-        search = input(f'Введите запрос (пустая строка для вывода всего справочника): \n').capitalize()
-
+        search = input(f'Введите запрос (пустая строка для вывода всего справочника): ').capitalize()
         found_contacts = (list(filter(
             lambda el: search in el['name'] or search in el['surname'] or search in el['patronymic'] or search in el[
                 'phone_number'],
@@ -120,7 +170,7 @@ def print_contact(contacts_list: list) -> None:
         print('\n'.join(f'{human_key[k]}: {v}' for k, v in i.items() if k != 'id'), end='\n')
 
 
-def file_is_exists(file_name: str):
+def file_is_exists(file_name: str) -> str or list:
     if not pathlib.Path(f'{file_name}.txt').exists():
         print('<!-- Такого файла не существует! -->')
         print('<!-- Создаем -->')
@@ -130,7 +180,7 @@ def file_is_exists(file_name: str):
 
 
 def user_choice(file_name: str) -> int:
-    print('Что делаем?')
+    print('<!-- Что делаем? --!>')
     choice = int(input())
     if choice == 1:
         add_contact(file_name)
@@ -141,7 +191,7 @@ def user_choice(file_name: str) -> int:
     elif choice == 4:
         delete_contact(file_name)
     else:
-        print('<!-- Работа со справочником завершается --!>')
+        print('\n<!-- Завершена работа со справочником --!>')
         return 0
     return 1
 
@@ -149,7 +199,7 @@ def user_choice(file_name: str) -> int:
 def menu_print(file_name: str) -> int:
     data = {1: 'Добавить контакт',
             2: 'Поиск по справочнику',
-            3: 'Обновить контакт',
+            3: 'Изменить контакт',
             4: 'Удалить контакт',
             5: 'Закончить работу со справочником'}
     print('-' * 10)
