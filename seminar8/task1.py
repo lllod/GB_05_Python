@@ -42,35 +42,39 @@ def new_contact_info(file: list, contact_id: int) -> list:
     return file
 
 
-def delete_contact(file_name: str) -> None:
-    print('\n<!-- Найдите контакт, который необходимо удалить --!>\n')
-    if searching_contact(file_name):
-        contact_id_delete = input('Введите номер контакта, который необходимо удалить: ')
-        file = open_file(file_name)
-        try:
-            contact_delete = next(x for x in file if contact_id_delete in str(x['id']))
-            file.remove(contact_delete)
-            save_file(file, file_name)
-            print('\n<!-- Контакт успешно удален --!>\n')
-        except StopIteration:
-            print('\n<!-- Вы ввели некорректные данные --!>\n')
-    else:
-        delete_contact(file_name)
+def delete_contact(file_name: str) -> int:
+    file = open_file(file_name)
+    if file:
+        print('\n<!-- Найдите контакт, который необходимо удалить --!>\n')
+        if searching_contact(file_name):
+            contact_id_delete = input('Введите номер контакта, который необходимо удалить: ')
+            try:
+                contact_delete = next(x for x in file if contact_id_delete in str(x['id']))
+                file.remove(contact_delete)
+                save_file(file, file_name)
+                print('\n<!-- Контакт успешно удален --!>\n')
+            except StopIteration:
+                print('\n<!-- Вы ввели некорректные данные --!>\n')
+        else:
+            delete_contact(file_name)
+    return 0
 
 
-def update_contact(file_name: str) -> None:
-    print('\n<!-- Найдите контакт, который необходимо изменить --!>\n')
-    if searching_contact(file_name):
-        contact_id_update = input('Введите номер контакта, который необходимо изменить: ')
-        file = open_file(file_name)
-        try:
-            contact_update = next(x for x in file if contact_id_update in str(x['id']))
-            contact_update_index = file.index(contact_update)
-            update_menu(file, contact_update_index, file_name)
-        except StopIteration:
-            print('\n<!-- Вы ввели некорректные данные --!>\n')
-    else:
-        update_contact(file_name)
+def update_contact(file_name: str) -> int:
+    file = open_file(file_name)
+    if file:
+        print('\n<!-- Найдите контакт, который необходимо изменить --!>\n')
+        if searching_contact(file_name):
+            contact_id_update = input('Введите номер контакта, который необходимо изменить: ')
+            try:
+                contact_update = next(x for x in file if contact_id_update in str(x['id']))
+                contact_update_index = file.index(contact_update)
+                update_menu(file, contact_update_index, file_name)
+            except StopIteration:
+                print('\n<!-- Вы ввели некорректные данные --!>\n')
+        else:
+            update_contact(file_name)
+    return 0
 
 
 def update_fileds(file_list: list, contact_index: int, file_name: str) -> int:
@@ -128,24 +132,24 @@ def create_file(file_name: str) -> list:
     return list()
 
 
-def open_file(file_name: str) -> list:
-    with open(f'{file_name}.txt', 'r', encoding='UTF-8') as contacts_list:
-        file = json.load(contacts_list)
-    return file
+def open_file(file_name: str) -> list or int:
+    with open(os.path.join(os.path.dirname(__file__), f'{file_name}.txt'), 'r', encoding='UTF-8') as contacts_list:
+        try:
+            file = json.load(contacts_list)
+            return file
+        except json.decoder.JSONDecodeError:
+            print('\n<!-- Справочник пуст --!>\n')
+            return 0
 
 
 def save_file(file: list, file_name: str) -> None:
-    with open(f'{file_name}.txt', 'w', encoding='UTF-8') as contacts_list:
+    with open(os.path.join(os.path.dirname(__file__), f'{file_name}.txt'), 'w', encoding='UTF-8') as contacts_list:
         json.dump(file, contacts_list, indent=2, ensure_ascii=False)
 
 
 def searching_contact(file_name) -> int:
-    with open(os.path.join(os.path.dirname(__file__), f'{file_name}.txt'), 'r', encoding='UTF-8') as contact_list:
-        try:
-            file = json.load(contact_list)
-        except json.decoder.JSONDecodeError:
-            print('\n<!-- Справочник пуст --!>\n')
-            return 0
+    file = open_file(file_name)
+    if file:
         search = input(f'Введите запрос (пустая строка для вывода всего справочника): ').capitalize()
         found_contacts = (list(filter(
             lambda el: search in el['name'] or search in el['surname'] or search in el['patronymic'] or search in el[
@@ -157,6 +161,7 @@ def searching_contact(file_name) -> int:
         else:
             print('\n<!-- Найти контакт не удалось, попробуйте еще раз --!>\n')
             return 0
+    return 0
 
 
 def print_contact(contacts_list: list) -> None:
